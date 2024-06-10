@@ -1,0 +1,222 @@
+* 2.1.3  SQLite
+CREATE TABLE test (id int, num int);
+INSERT INTO test VALUES (1, 100), (2, 200);
+SELECT * FROM test LIMIT 1;
+
+.databases
+.tables
+.quit
+
+* 2.1.4  MySQL
+CREATE TABLE test (id int, num int);
+INSERT INTO test VALUES (1, 100), (2, 200);
+SELECT * FROM test LIMIT 1;
+
+show databases;
+connect another_db;
+show tables;
+quit
+
+* 2.1.5  Oracle
+CREATE TABLE test (id int, num int);
+INSERT INTO test VALUES (1, 100);
+INSERT INTO test VALUES (2, 200);
+SELECT * FROM test WHERE ROWNUM <=1;
+
+SELECT * FROM global_name;
+SELECT table_name FROM all_tables;
+SELECT table_name FROM user_tables;
+quit
+
+* 2.1.6  PostgreSQL
+CREATE TABLE test (id int, num int);
+INSERT INTO test VALUES (1, 100), (2, 200);
+SELECT * FROM test LIMIT 1;
+
+\l
+\c another_db
+\d
+\q
+
+* 2.1.7  SQL Server
+CREATE TABLE test (id int, num int);
+INSERT INTO test VALUES (1, 100), (2, 200);
+go
+SELECT TOP 1 * FROM test;
+go
+
+SELECT name FROM master.sys.databases;
+go
+USE another_db;
+go
+SELECT * FROM information_schema.tables;
+go
+quit
+
+* 2.2.1
+CREATE DATABASE my_new_db;
+
+* 2.3.1
+表2-2：
+-- MySQL
+pip install mysql-connector-python
+conda install -c conda-forge mysql-connector-python
+
+-- Oracle
+pip install cx_Oracle
+conda install -c conda-forge cx_oracle
+
+-- PostgreSQL
+pip install psycopg2
+conda install -c conda-forge psycopg2
+
+-- SQL Server
+pip install pyodbc
+conda install -c conda-forge pyodbc
+
+表2-3：
+-- SQLite
+import sqlite3
+conn = sqlite3.connect('my_new_db.db')
+
+-- MySQL
+import mysql.connector
+conn = mysql.connector.connect(
+             host='localhost',
+             database='my_new_db',
+             user='alice',
+             password='password')
+
+-- Oracle
+import cx_Oracle
+conn = cx_Oracle.connect(dsn='localhost/XE',
+                         user='alice',
+                         password='password')
+
+-- PostgreSQL
+import psycopg2
+conn = psycopg2.connect(host='localhost',
+                        database='my_new_db',
+                        user='alice',
+                        password='password')
+
+-- SQL Server
+import pyodbc
+conn = pyodbc.connect(driver='{SQL Server}',
+                      host='localhost\SQLEXPRESS',
+                      database='my_new_db',
+                      user='alice',
+                      password='password')
+
+コラム：
+import cx_Oracle
+import db_config
+
+conn = cx_Oracle.connect(dsn='localhost/XE',
+       user=db_config.usr,
+       password=db_config.pwd)
+
+ステップ 3：
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM test;')
+result = cursor.fetchall()
+print(result)
+
+# pandasがインストール済みでなければなりません
+import pandas as pd
+
+df = pd.read_sql('''SELECT * FROM test;''', conn)
+print(df)
+print(type(df))
+
+cursor.close()
+conn.close()
+
+コラム：
+-- SQLAlchemyを使用しない場合
+pd.read_sql("""SELECT tablename
+            FROM pg_catalog.pg_tables
+            WHERE schemaname='public'""", conn)
+
+-- SQLAlchemyを使用しない場合
+conn.table_names()
+
+pip install sqlalchemy
+conda install -c conda-forge sqlalchemy
+
+from sqlalchemy import create_engine
+conn = create_engine('postgresql+psycopg2://
+       alice:password@localhost:5432/my_new_db')
+
+* 2.3.2
+表2-4：
+-- SQLite
+install.packages("RSQLite")
+
+-- MySQL
+install.packages("RMySQL")
+
+-- Oracle
+setwd("ROracleをダウンロードしたフォルダー")
+install.packages("ROracle_1.3-2.zip", repos=NULL)
+
+-- PostgreSQL
+install.packages("RPostgres")
+
+-- SQL Server
+install.packages("odbc")
+
+表2-5：
+-- SQLite
+library(DBI)
+con <- dbConnect(RSQLite::SQLite(),
+                 "my_new_db.db")
+
+-- MySQL
+library(RMySQL)
+con <- dbConnect(RMySQL::MySQL(),
+                 host="localhost",
+                 dbname="my_new_db",
+                 user="alice",
+                 password="password")
+
+-- Oracle
+library(ROracle)
+drv <- dbDriver("Oracle")
+con <- dbConnect(drv, "alice", "password",
+                 dbname="my_new_db")
+
+-- PostgreSQL
+library(RPostgres)
+con <- dbConnect(RPostgres::Postgres(),
+                 host="localhost",
+                 dbname="my_new_db",
+                 user="alice",
+                 password="password")
+
+-- SQL Server
+library(DBI)
+con <- DBI::dbConnect(odbc::odbc(),
+            Driver="SQL Server",
+            Server="localhost\\SQLEXPRESS", 
+            Database="my_new_db",
+            User="alice",
+            Password="password",
+            Trusted_Connection="True")
+
+コラム：
+install.packages("rstudioapi")
+con <- dbConnect(...,
+    password=rstudioapi::askForPassword("Password?"),
+    ...)
+
+ステップ 3：
+dbListTables(con)
+
+dbReadTable(con, "test")
+
+df <- dbGetQuery(con, "SELECT * FROM test WHERE id = 2")
+print(df); class(df)
+
+dbDisconnect(con)
+

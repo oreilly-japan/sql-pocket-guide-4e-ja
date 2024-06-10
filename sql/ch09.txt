@@ -1,0 +1,611 @@
+* 9.1
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE states (
+    name    VARCHAR(10),
+    state   CHAR(2)
+);
+CREATE TABLE pets (
+    name    VARCHAR(10),
+    pet     VARCHAR(10)
+);
+INSERT INTO states VALUES ('Ada', 'AZ');
+INSERT INTO states VALUES ('Deb', 'DE');
+INSERT INTO pets VALUES ('Deb', 'dog');
+INSERT INTO pets VALUES ('Deb', 'duck');
+INSERT INTO pets VALUES ('Pat', 'pig');
+
+SELECT * FROM states;
+SELECT * FROM pets;
+
+SELECT *
+FROM states s INNER JOIN pets p
+     ON s.name = p.name;
+
+表9-2：
+SELECT *
+FROM states s JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s INNER JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s LEFT JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s RIGHT JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s FULL OUTER JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s CROSS JOIN pets p;
+
+表9-3：
+SELECT *
+FROM states s
+  INNER JOIN pets p
+    ON s.name = p.name;
+
+SELECT *
+FROM states
+  INNER JOIN pets
+    USING (name);
+
+SELECT *
+FROM states
+  NATURAL JOIN pets;
+
+SELECT *
+FROM states s, pets p
+WHERE s.name = p.name;
+
+SELECT *
+FROM states s1, states s2
+WHERE s1.region = s2.region;
+
+SELECT *
+FROM states s1
+  INNER JOIN states s2
+    ON s1.region = s2.region;
+
+※最後の2つの文は、statesテーブルにregion列がないため、実行するとエラーになります。
+
+* 9.1.1.1
+ステップ 1：
+SELECT *
+FROM states, pets;
+
+ステップ 2：
+SELECT *
+FROM states s, pets p
+WHERE s.name = p.name;
+
+* 9.1.1.2
+SELECT *
+FROM states s INNER JOIN pets p
+     ON s.name = p.name;
+
+SELECT *
+FROM states s
+     INNER JOIN pets p
+        ON s.name = p.name
+     INNER JOIN lunch l
+        ON s.name = l.name;
+
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE states_ages (
+    name    VARCHAR(10),
+    state   CHAR(2),
+    age     INTEGER
+);
+CREATE TABLE pets_ages (
+    name    VARCHAR(10),
+    pet     VARCHAR(10),
+    age     INTEGER
+);
+INSERT INTO states_ages VALUES ('Ada', 'AK', 25);
+INSERT INTO states_ages VALUES ('Ada', 'AZ', 30);
+INSERT INTO pets_ages VALUES ('Ada', 'ant', 30);
+INSERT INTO pets_ages VALUES ('Pat', 'pig', 45);
+
+SELECT * FROM states_ages;
+SELECT * FROM pets_ages;
+
+SELECT *
+FROM states_ages s INNER JOIN pets_ages p
+     ON s.name = p.name
+     AND s.age = p.age;
+
+* 9.1.2.1
+SELECT *
+FROM states s LEFT JOIN pets p
+     ON s.name = p.name;
+
+* 9.1.2.2
+SELECT *
+FROM states s RIGHT JOIN pets p
+     ON s.name = p.name;
+
+* 9.1.2.3
+-- Oracle、PostgreSQL、SQL Server、SQLite
+SELECT *
+FROM states s FULL OUTER JOIN pets p
+     ON s.name = p.name;
+
+* 9.1.3.1
+-- ON句
+SELECT *
+FROM states s INNER JOIN pets p
+     ON s.name = p.name;
+
+-- 同等のUSINGショートカット
+SELECT *
+FROM states INNER JOIN pets
+     USING (name);
+
+* 9.1.3.2
+-- INNER JOIN .. ON .. AND ..
+SELECT *
+FROM states_ages s INNER JOIN pets_ages p
+     ON s.name = p.name
+     AND s.age = p.age;
+
+-- 同等のNATURAL JOINショートカット
+SELECT *
+FROM states_ages NATURAL JOIN pets_ages;
+
+* 9.1.4.1
+-- クロス結合
+SELECT *
+FROM states CROSS JOIN pets;
+
+-- 同等のテーブル名リスト
+SELECT *
+FROM states, pets;
+
+* 9.1.4.2
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE employee (
+    dept        VARCHAR(10),
+    emp_id      INTEGER,
+    emp_name    VARCHAR(10),
+    mgr_id      INTEGER
+);
+INSERT INTO employee VALUES ('tech', 201, 'lisa', 101);
+INSERT INTO employee VALUES ('tech', 202, 'monica', 101);
+INSERT INTO employee VALUES ('data', 203, 'nancy', 201);
+INSERT INTO employee VALUES ('data', 204, 'olivia', 201);
+INSERT INTO employee VALUES ('data', 205, 'penny', 202);
+
+SELECT * FROM employee;
+
+例 1：
+SELECT e1.emp_name, e2.emp_name AS mgr_name
+FROM employee e1, employee e2
+WHERE e1.mgr_id = e2.emp_id;
+
+例 2：
+SELECT e.dept, e.emp_name, matching_emp.emp_name
+FROM employee e, employee matching_emp
+WHERE e.dept = matching_emp.dept
+      AND e.emp_name <> matching_emp.emp_name;
+
+ノート記事：
+SELECT e.dept, e.emp_name, matching_emp.emp_name
+FROM employee e, employee matching_emp
+WHERE e.dept = matching_emp.dept
+      AND e.emp_name <> matching_emp.emp_name
+      AND e.emp_name < matching_emp.emp_name;
+
+* 9.2.1
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE staff (
+    name    VARCHAR(10),
+    origin  VARCHAR(10)
+);
+CREATE TABLE residents (
+    name        VARCHAR(10),
+    country     VARCHAR(10),
+    occupation  VARCHAR(10)
+);
+INSERT INTO staff VALUES ('michael', NULL);
+INSERT INTO staff VALUES ('janet', NULL);
+INSERT INTO staff VALUES ('tahani', 'england');
+INSERT INTO residents VALUES ('eleanor', 'usa', 'temp');
+INSERT INTO residents VALUES ('chidi', 'nigeria', 'professor');
+INSERT INTO residents VALUES ('tahani', 'england', 'model');
+INSERT INTO residents VALUES ('jason', 'usa', 'dj');
+
+SELECT * FROM staff;
+SELECT * FROM residents;
+
+SELECT name, origin FROM staff
+UNION
+SELECT name, country FROM residents;
+
+* 9.2.1.1
+SELECT name, origin FROM staff
+UNION ALL
+SELECT name, country FROM residents;
+
+* 9.2.1.2
+SELECT name, origin
+FROM staff
+WHERE origin IS NOT NULL
+UNION
+SELECT name, country
+FROM residents
+ORDER BY name;
+
+* 9.2.1.3
+SELECT name, origin
+FROM staff
+UNION
+SELECT name, country
+FROM residents
+UNION
+SELECT name, country
+FROM my_simple_table;
+
+* 9.2.2.1
+SELECT name FROM staff
+EXCEPT
+SELECT name FROM residents;
+
+SELECT name
+FROM staff
+WHERE name NOT IN (SELECT name FROM residents);
+
+-- Oracle
+SELECT name FROM staff
+MINUS
+SELECT name FROM residents;
+
+* 9.2.2.2
+SELECT name, origin FROM staff
+INTERSECT
+SELECT name, country FROM residents;
+
+SELECT s.name, s.origin
+FROM staff s INNER JOIN residents r
+ON s.name = r.name;
+
+コラム：
+SELECT name FROM staff
+EXCEPT
+(SELECT name FROM residents
+ UNION
+ SELECT name FROM pets);
+
+-- SQLite
+SELECT name FROM staff
+EXCEPT
+SELECT name FROM 
+   (SELECT name FROM residents
+    UNION
+    SELECT name FROM pets);
+
+-- SQLite
+WITH residents_pets as (
+    SELECT name FROM residents
+    UNION
+    SELECT name FROM pets)
+SELECT name FROM staff
+EXCEPT
+SELECT name FROM residents_pets;
+
+* 9.3
+-- my_cteの結果に対してクエリーを行う
+WITH my_cte AS (
+    SELECT name, AVG(grade) AS avg_grade
+    FROM my_table
+    GROUP BY name)
+SELECT *
+FROM my_cte
+WHERE avg_grade < 70;
+
+-- 1から10までの数値を生成する
+WITH RECURSIVE my_cte(n) AS
+(
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM my_cte WHERE n < 10
+)
+SELECT * FROM my_cte;
+
+-- Oracle
+WITH my_cte(n) AS
+(
+    SELECT 1 FROM dual
+    UNION ALL
+    SELECT n + 1 FROM my_cte WHERE n < 10
+)
+SELECT * FROM my_cte;
+
+-- SQL Server
+WITH my_cte(n) AS
+(
+    SELECT 1
+    UNION ALL
+    SELECT n + 1 FROM my_cte WHERE n < 10
+)
+SELECT * FROM my_cte;
+
+* 9.3.1
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE employees;
+CREATE TABLE employees (
+    dept    VARCHAR(10),
+    id      INTEGER,
+    salary  INTEGER
+);
+INSERT INTO employees VALUES ('mktg', 10001, 80000);
+INSERT INTO employees VALUES ('mktg', 10002, 76000);
+INSERT INTO employees VALUES ('sales', 10031, 60000);
+INSERT INTO employees VALUES ('sales', 10032, 70000);
+INSERT INTO employees VALUES ('sales', 10033, 53000);
+INSERT INTO employees VALUES ('tech', 10057, 90000);
+INSERT INTO employees VALUES ('tech', 10058, 70000);
+INSERT INTO employees VALUES ('tech', 10059, 89000);
+
+SELECT * FROM employees;
+
+ステップ 1：
+SELECT dept, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept;
+
+ステップ 2：
+-- CTEによる方法
+WITH avg_dept_salary AS (
+    SELECT dept, AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY dept)
+SELECT *
+FROM avg_dept_salary
+ORDER BY avg_salary DESC
+LIMIT 1;
+
+-- サブクエリーによる同等の方法
+SELECT *
+FROM
+(SELECT dept, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept) avg_dept_salary
+ORDER BY avg_salary DESC
+LIMIT 1;
+
+
+-- CTEによる方法（SQL Server）
+WITH avg_dept_salary AS (
+    SELECT dept, AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY dept)
+SELECT TOP 1 *
+FROM avg_dept_salary
+ORDER BY avg_salary DESC;
+
+-- サブクエリーによる同等の方法（SQL Server）
+SELECT TOP 1 *
+FROM
+(SELECT dept, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept) avg_dept_salary
+ORDER BY avg_salary DESC;
+
+
+-- CTEによる方法（Oracleでの方法）
+WITH avg_dept_salary AS (
+    SELECT dept, AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY dept
+    ORDER BY avg_salary DESC)
+SELECT *
+FROM avg_dept_salary
+WHERE ROWNUM = 1;
+
+-- サブクエリーによる同等の方法（Oracleでの方法）
+SELECT *
+FROM
+(SELECT dept, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY dept
+ORDER BY avg_salary DESC) avg_dept_salary
+WHERE ROWNUM = 1;
+
+* 9.3.2.1
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE stock_prices (
+    sp_date     DATE,
+    price       DECIMAL(5,2)
+);
+INSERT INTO stock_prices VALUES ('2021-03-01', 668.27);
+INSERT INTO stock_prices VALUES ('2021-03-03', 678.83);
+INSERT INTO stock_prices VALUES ('2021-03-04', 635.40);
+INSERT INTO stock_prices VALUES ('2021-03-06', 591.01);
+
+SELECT * FROM stock_prices;
+
+ステップ 1：
+-- MySQLでの構文
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT '2021-03-01'
+    UNION ALL
+    SELECT dt + INTERVAL 1 DAY
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT * FROM my_dates;
+
+ステップ 2：
+-- MySQLでの構文
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT '2021-03-01'
+    UNION ALL
+    SELECT dt + INTERVAL 1 DAY
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT d.dt, s.price
+FROM my_dates d
+     LEFT JOIN stock_prices s
+     ON d.dt = s.sp_date;
+
+ステップ 3：
+-- MySQLでの構文
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT '2021-03-01'
+    UNION ALL
+    SELECT dt + INTERVAL 1 DAY
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT d.dt, COALESCE(s.price,
+       LAG(s.price) OVER
+       (ORDER BY d.dt)) AS price
+FROM my_dates d
+     LEFT JOIN stock_prices s
+     ON d.dt = s.sp_date;
+
+表9-4：
+-- MySQL
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT '2021-03-01'
+    UNION ALL
+    SELECT dt + INTERVAL 1 DAY
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT * FROM my_dates;
+
+-- Oracle
+WITH my_dates(dt) AS (
+    SELECT DATE '2021-03-01' FROM dual
+    UNION ALL
+    SELECT dt + INTERVAL '1' DAY
+    FROM my_dates
+    WHERE dt < DATE '2021-03-06')
+SELECT * FROM my_dates;
+
+-- PostgreSQL
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT CAST('2021-03-01' AS DATE)
+    UNION ALL
+    SELECT CAST(dt + INTERVAL '1 day' AS DATE)
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT * FROM my_dates;
+
+-- SQL Server
+WITH my_dates(dt) AS (
+    SELECT CAST('2021-03-01' AS DATE)
+    UNION ALL
+    SELECT DATEADD(DAY, 1, CAST(dt AS DATE))
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT * FROM my_dates;
+
+-- SQLite
+WITH RECURSIVE my_dates(dt) AS (
+    SELECT DATE('2021-03-01')
+    UNION ALL
+    SELECT DATE(dt, '1 day')
+    FROM my_dates
+    WHERE dt < '2021-03-06')
+SELECT * FROM my_dates;
+
+* 9.3.2.2
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE family_tree (
+    id          INTEGER,
+    name        VARCHAR(30),
+    role        VARCHAR(10),
+    parent_id   INTEGER
+);
+INSERT INTO family_tree VALUES (1, 'Lao Ye', 'Grandpa', NULL);
+INSERT INTO family_tree VALUES (2, 'Lao Lao', 'Grandma', NULL);
+INSERT INTO family_tree VALUES (3, 'Ollie', 'Dad', NULL);
+INSERT INTO family_tree VALUES (4, 'Alice', 'Mom', 1);
+INSERT INTO family_tree VALUES (4, 'Alice', 'Mom', 2);
+INSERT INTO family_tree VALUES (5, 'Henry', 'Son', 3);
+INSERT INTO family_tree VALUES (5, 'Henry', 'Son', 4);
+INSERT INTO family_tree VALUES (6, 'Lily', 'Daughter', 3);
+INSERT INTO family_tree VALUES (6, 'Lily', 'Daughter', 4);
+
+SELECT * FROM family_tree;
+
+-- MySQLの構文
+WITH RECURSIVE my_cte (id, name, lineage) AS (
+    SELECT id, name, name AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name,
+           CONCAT(mc.lineage, ' > ', ft.name)
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+
+表9-5：
+-- MySQL
+WITH RECURSIVE my_cte (id, name, lineage) AS (
+    SELECT id, name, name AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name, CONCAT(mc.lineage, ' > ', ft.name)
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+
+-- Oracle
+WITH my_cte (id, name, lineage) AS (
+    SELECT id, name, name AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name, mc.lineage || ' > ' || ft.name
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+
+-- PostgreSQL
+WITH RECURSIVE my_cte (id, name, lineage) AS (
+    SELECT id, name, CAST(name AS VARCHAR(30)) AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name, CAST(CONCAT(mc.lineage, ' > ', ft.name) AS VARCHAR(30))
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+
+-- SQL Server
+WITH my_cte (id, name, lineage) AS (
+    SELECT id, name, CAST(name AS VARCHAR(30)) AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name, CAST(CONCAT(mc.lineage, ' > ', ft.name) AS VARCHAR(30))
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+
+-- SQLite
+WITH RECURSIVE my_cte (id, name, lineage) AS (
+    SELECT id, name, name AS lineage
+    FROM family_tree
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT ft.id, ft.name, mc.lineage || ' > ' || ft.name
+    FROM family_tree ft
+         INNER JOIN my_cte mc
+         ON ft.parent_id = mc.id)
+SELECT * FROM my_cte ORDER BY id;
+

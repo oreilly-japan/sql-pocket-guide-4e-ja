@@ -1,0 +1,49 @@
+付録B
+
+SELECT TRUE, True, FALSE, False;
+
+
+CREATE TABLE IF NOT EXISTS my_simple_table (
+    id NUMBER,
+    country VARCHAR2(2),
+    name VARCHAR2(15)
+);
+
+DROP TABLE IF EXISTS my_table;
+
+
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     waterfall w INNER JOIN tour t
+         ON w.id = t.stop
+GROUP BY tour_name
+HAVING   num_waterfalls = 6;
+
+
+ALTER SESSION SET group_by_position_enabled = TRUE;
+
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     waterfall w INNER JOIN tour t
+         ON w.id = t.stop
+GROUP BY 1
+HAVING   num_waterfalls = 6;
+
+
+UPDATE deals d
+SET    d.name = p.name
+FROM   products p
+WHERE  d.id = p.id;
+
+
+SELECT CEIL(date '2020-02-05', 'month');
+
+SELECT FLOOR(date '2020-02-25', 'month');
+
+
+INSERT INTO my_simple_table
+       (id, country, name)
+VALUES (2, 'US', 'Selena'),
+       (3, 'CA', 'Shawn'),
+       (4, 'US', 'Sutton');
+

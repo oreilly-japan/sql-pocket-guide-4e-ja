@@ -1,0 +1,810 @@
+* 5.1.2
+表5-1：
+-- MySQL
+SHOW databases;
+
+-- Oracle
+SELECT * FROM global_name;
+
+-- PostgreSQL
+\l
+
+-- SQL Server
+SELECT name FROM master.sys.databases;
+
+-- SQLite
+.database
+
+* 5.1.3
+表5-2：
+-- MySQL
+SELECT database();
+
+-- Oracle
+SELECT * FROM global_name;
+
+-- PostgreSQL
+SELECT current_database();
+
+-- SQL Server
+SELECT db_name();
+
+-- SQLite
+.database
+
+* 5.1.4
+表5-3：
+-- MySQL、SQL Server
+USE another_db;
+
+-- Oracle
+connect another_user
+
+-- PostgreSQL
+\c another_db
+
+-- SQLite
+.open another_db
+
+* 5.1.5
+表5-4：
+-- MySQL、Oracle、PostgreSQL、SQL Server
+CREATE DATABASE my_new_db;
+
+-- SQLite
+$ sqlite3 my_new_db.db
+
+* 5.1.6
+表5-5：
+-- MySQL、Oracle、PostgreSQL、SQL Server
+DROP DATABASE my_new_db;
+
+* 5.2.1
+CREATE TABLE my_simple_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+INSERT INTO my_simple_table (id, country, name)
+VALUES (1, 'US', 'Sam');
+
+表5-6：
+-- MySQL、PostgreSQL、SQL Server、SQLite
+INSERT INTO my_simple_table
+       (id, country, name)
+VALUES (2, 'US', 'Selena'),
+       (3, 'CA', 'Shawn'),
+       (4, 'US', 'Sutton');
+
+-- Oracle
+INSERT ALL
+    INTO my_simple_table (id, country, name)
+                  VALUES (2, 'US', 'Selena')
+    INTO my_simple_table (id, country, name)
+                  VALUES (3, 'CA', 'Shawn')
+    INTO my_simple_table (id, country, name)
+                  VALUES (4, 'US', 'Sutton')
+SELECT * FROM dual;
+
+SELECT * FROM my_simple_table;
+
+* 5.2.2
+表5-7：
+-- MySQL
+SHOW tables;
+
+-- Oracle
+-- システムテーブルを含む、すべてのテーブル
+SELECT table_name FROM all_tables;
+-- ユーザーが作成したすべてのテーブル
+SELECT table_name FROM user_tables;
+
+-- PostgreSQL
+\dt
+
+-- SQL Server
+SELECT table_name FROM information_schema.tables;
+
+-- SQLite
+.tables
+
+* 5.2.3
+CREATE TABLE IF NOT EXISTS my_simple_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+* 5.2.4
+CREATE TABLE another_table (
+    country VARCHAR(2) NOT NULL,
+    name VARCHAR(15) NOT NULL,
+    description VARCHAR(50),
+    CONSTRAINT pk_another_table
+        PRIMARY KEY (country, name)
+);
+
+CREATE TABLE my_table (
+    id INTEGER NOT NULL,
+    country VARCHAR(2) DEFAULT 'CA'
+        CONSTRAINT chk_country
+        CHECK (country IN ('CA','US')),
+    name VARCHAR(15),
+    cap_name VARCHAR(15),
+    CONSTRAINT pk
+        PRIMARY KEY (id),
+    CONSTRAINT fk1
+        FOREIGN KEY (country, name)
+        REFERENCES another_table (country, name),
+    CONSTRAINT unq_country_name
+        UNIQUE (country, name),
+    CONSTRAINT chk_upper_name
+        CHECK (cap_name = UPPER(name))
+);
+
+* 5.2.4.1
+CREATE TABLE my_table (
+    id INTEGER NOT NULL,
+    country VARCHAR(2) NULL,
+    name VARCHAR(15)
+);
+
+* 5.2.4.2
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2) DEFAULT 'CA',
+    name VARCHAR(15)
+);
+
+* 5.2.4.3
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2) CHECK
+        (country IN ('CA', 'US')),
+    name VARCHAR(15)
+);
+
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15),
+    CHECK (country IN ('CA','US'))
+);
+
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15),
+    CONSTRAINT chk_id_country
+    CHECK (id > 100 AND country IN ('CA','US'))
+);
+
+* 5.2.4.4
+CREATE TABLE my_table (
+    id INTEGER UNIQUE,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15),
+    UNIQUE (id)
+);
+
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15),
+    CONSTRAINT unq_country_name
+    UNIQUE (country, name)
+);
+
+* 5.2.5.1
+CREATE TABLE my_table (
+    id INTEGER PRIMARY KEY,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+CREATE TABLE my_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15),
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE my_table (
+    id INTEGER NOT NULL,
+    country VARCHAR(2),
+    name VARCHAR(15) NOT NULL,
+    CONSTRAINT pk_id_name
+    PRIMARY KEY (id, name)
+);
+
+* 5.2.5.2
+CREATE TABLE orders (
+    o_id INTEGER PRIMARY KEY,
+    o_location VARCHAR(20),
+    o_price DECIMAL(6,2)
+);
+
+CREATE TABLE customers (
+    id INTEGER PRIMARY KEY,
+    order_id INTEGER,
+    name VARCHAR(15),
+    location VARCHAR(20),
+    FOREIGN KEY (order_id)
+    REFERENCES orders (o_id)
+);
+
+CREATE TABLE orders (
+    o_id INTEGER,
+    o_location VARCHAR(20),
+    o_price DECIMAL(6,2),
+    PRIMARY KEY (o_id, o_location)
+);
+
+CREATE TABLE customers (
+    id INTEGER PRIMARY KEY,
+    order_id INTEGER,
+    name VARCHAR(15),
+    location VARCHAR(20),
+    CONSTRAINT fk_id_name
+    FOREIGN KEY (order_id, location)
+    REFERENCES orders (o_id, o_location)
+);
+
+* 5.2.6
+表5-8：
+-- MySQL
+CREATE TABLE my_table (
+    u_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+-- Oracle
+CREATE TABLE my_table (
+    u_id INTEGER GENERATED BY DEFAULT
+                 ON NULL AS IDENTITY,
+    country VARCHAR2(2),
+    name VARCHAR2(15)
+);
+
+-- PostgreSQL
+CREATE TABLE my_table (
+    u_id SERIAL,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+-- SQL Server
+CREATE TABLE my_table (
+    u_id INTEGER IDENTITY(1,1),
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+-- SQLite
+CREATE TABLE my_table (
+    u_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+* 5.2.7
+SELECT * FROM my_simple_table;
+
+CREATE TABLE new_table_two_columns (
+    id INTEGER,
+    name VARCHAR(15)
+);
+
+INSERT INTO new_table_two_columns
+            (id, name)
+SELECT id, name
+FROM   my_simple_table
+WHERE  id < 3;
+
+SELECT * FROM new_table_two_columns;
+
+CREATE TABLE new_table_four_columns (
+    id INTEGER,
+    name VARCHAR(15),
+    new_num_column INTEGER,
+    new_text_column VARCHAR(30)
+);
+
+INSERT INTO new_table_four_columns
+    (id, name, new_num_column, new_text_column)
+SELECT id, name, 2017, 'stargazing'
+FROM   my_simple_table
+WHERE  id = 2;
+
+INSERT INTO new_table_four_columns
+    (id, name, new_num_column, new_text_column)
+SELECT 3, name, 2017, 'wolves'
+FROM   my_simple_table
+WHERE  id = 2;
+
+SELECT * FROM new_table_four_columns;
+
+* 5.2.8
+CREATE TABLE new_table (
+    id INTEGER,
+    country VARCHAR(2),
+    name VARCHAR(15)
+);
+
+表5-9：
+-- MySQL
+LOAD DATA LOCAL
+INFILE '<file_path>/my_data.csv'
+INTO TABLE new_table
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+-- PostgreSQL
+\copy new_table FROM '<file_path>/my_data.csv' DELIMITER ',' CSV HEADER
+
+-- SQL Server
+BULK INSERT new_table
+FROM '<file_path>/my_data.csv'
+WITH
+(
+    FORMAT = 'CSV',
+    FIELDTERMINATOR = ',',
+    FIELDQUOTE = '"',
+    ROWTERMINATOR = '\n',
+    FIRSTROW = 2,
+    TABLOCK
+);
+
+-- SQLite
+.mode csv
+.import <file_path>/my_data.csv new_table --skip 1
+.mode list
+
+SELECT * FROM new_table;
+
+* 5.2.8.1
+UPDATE new_table
+SET country = NULL
+WHERE country = '\N';
+
+* 5.3.1.1
+表5-10：
+-- MySQL、Oracle、PostgreSQL、SQLite
+ALTER TABLE old_table_name
+      RENAME TO new_table_name;
+
+-- SQL Server
+EXEC sp_rename 'old_table_name', 'new_table_name';
+
+* 5.3.1.2
+表5-11：
+-- MySQL、Oracle、PostgreSQL、SQLite
+ALTER TABLE my_table
+      RENAME COLUMN old_column_name
+      TO new_column_name;
+
+-- SQL Server
+EXEC sp_rename 'my_table.old_column_name',
+               'new_column_name', 'COLUMN';
+
+* 5.3.2.1
+表5-12：
+-- MySQL、Oracle
+DESCRIBE my_table;
+
+-- PostgreSQL
+\d my_table
+
+-- SQL Server
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'my_table';
+
+-- SQLite
+pragma table_info(my_table);
+
+* 5.3.2.2
+表5-13：
+-- MySQL、PostgreSQL
+ALTER TABLE my_table
+      ADD new_num_column INTEGER,
+      ADD new_text_column VARCHAR(30);
+
+-- Oracle
+ALTER TABLE my_table ADD (
+      new_num_column INTEGER,
+      new_text_column VARCHAR2(30));
+
+-- SQL Server
+ALTER TABLE my_table
+      ADD new_num_column INTEGER,
+          new_text_column VARCHAR(30);
+
+-- SQLite
+ALTER TABLE my_table
+      ADD new_num_column INTEGER;
+ALTER TABLE my_table
+      ADD new_text_column VARCHAR(30);
+
+* 5.3.2.3
+表5-14：
+-- MySQL、PostgreSQL
+ALTER TABLE my_table
+      DROP COLUMN new_num_column,
+      DROP COLUMN new_text_column;
+
+-- Oracle
+ALTER TABLE my_table
+      DROP COLUMN new_num_column;
+ALTER TABLE my_table
+      DROP COLUMN new_text_column;
+
+-- SQL Server
+ALTER TABLE my_table
+      DROP COLUMN new_num_column,
+                  new_text_column;
+
+コラム：
+CREATE TABLE my_table_2 (
+    id INTEGER NOT NULL,
+    country VARCHAR(2),
+    name VARCHAR(30)
+);
+
+INSERT INTO my_table_2
+SELECT id, country, name
+FROM my_table;
+
+SELECT * FROM my_table_2;
+
+DROP TABLE my_table;
+
+ALTER TABLE my_table_2 RENAME TO my_table;
+
+* 5.3.3.1
+SELECT * FROM my_table;
+
+* 5.3.3.2
+INSERT INTO my_table
+   (id, country, name)
+VALUES (9, 'US', 'Charlie');
+
+* 5.3.3.3
+DELETE FROM my_table
+WHERE id = 9;
+
+DELETE FROM my_table;
+
+* 5.3.4.1
+表5-15：
+-- MySQL
+SHOW CREATE TABLE my_table;
+
+-- Oracle
+SELECT *
+FROM user_cons_columns
+WHERE table_name = 'MY_TABLE';
+
+-- PostgreSQL
+\d my_table
+
+-- SQL Server
+-- デフォルトの制約以外の制約を表示する
+SELECT  table_name,
+        constraint_name,
+        constraint_type
+FROM information_schema.table_constraints
+WHERE table_name = 'my_table';
+
+-- すべてのデフォルトの制約を表示する
+SELECT  OBJECT_NAME(parent_object_id),
+        COL_NAME(parent_object_id, parent_column_id),
+        definition
+FROM sys.default_constraints
+WHERE OBJECT_NAME(parent_object_id) = 'my_table';
+
+-- SQLite
+.schema my_table
+
+* 5.3.4.2
+CREATE TABLE my_table (
+    id INTEGER NOT NULL,
+    country VARCHAR(2) DEFAULT 'CA',
+    name VARCHAR(15),
+    lower_name VARCHAR(15)
+);
+
+表5-16：
+-- MySQL、PostgreSQL、SQL Server
+ALTER TABLE my_table
+      ADD CONSTRAINT chk_lower_name
+      CHECK (lower_name = LOWER(name));
+
+-- Oracle
+ALTER TABLE my_table
+      ADD (CONSTRAINT chk_lower_name
+      CHECK (lower_name = LOWER(name)));
+
+* 5.3.4.3
+CREATE TABLE my_table (
+    id INTEGER NOT NULL,
+    country VARCHAR(2) DEFAULT 'CA',
+    name VARCHAR(15),
+    lower_name VARCHAR(15)
+);
+
+表5-17：
+-- MySQL
+ALTER TABLE my_table
+      MODIFY country VARCHAR(2) NULL,
+      MODIFY name VARCHAR(30);
+
+-- Oracle
+ALTER TABLE my_table MODIFY (
+      country DEFAULT NULL,
+      name VARCHAR2(30)
+);
+
+-- PostgreSQL
+ALTER TABLE my_table
+      ALTER country DROP DEFAULT,
+      ALTER name TYPE VARCHAR(30);
+
+-- SQL Server
+ALTER TABLE my_table
+      ALTER COLUMN country
+      VARCHAR(2) NULL;
+ALTER TABLE my_table
+      ALTER COLUMN name
+      VARCHAR(30) NULL;
+
+* 5.3.4.4
+表5-18：
+-- MySQL
+ALTER TABLE my_table
+      DROP CHECK chk_lower_name;
+
+-- Oracle、PostgreSQL、SQL Server
+ALTER TABLE my_table
+      DROP CONSTRAINT chk_lower_name;
+
+* 5.3.5
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id      INTEGER,
+    country VARCHAR(10),
+    name    VARCHAR(20),
+    awards  INTEGER
+);
+INSERT INTO my_table VALUES (2, 'CA', 'Celine', 5);
+INSERT INTO my_table VALUES (3, 'CA', 'Michael', 4);
+INSERT INTO my_table VALUES (4, 'US', 'Stefani', 9);
+
+SELECT *
+FROM my_table;
+
+SELECT LOWER(name)
+FROM my_table;
+
+UPDATE my_table
+SET name = LOWER(name);
+
+SELECT * FROM my_table;
+
+* 5.3.6
+SELECT *
+FROM my_table;
+
+SELECT awards + 1
+FROM my_table
+WHERE country = 'CA';
+
+UPDATE my_table
+SET awards = awards + 1
+WHERE country = 'CA';
+
+SELECT * FROM my_table;
+
+* 5.3.7
+DELETE FROM my_table;
+INSERT INTO my_table VALUES (2, 'CA', 'Celine', 5);
+INSERT INTO my_table VALUES (3, 'CA', 'Michael', 4);
+INSERT INTO my_table VALUES (4, 'US', 'Stefani', 9);
+
+SELECT * FROM my_table;
+
+SELECT MIN(awards) FROM my_table;
+
+UPDATE my_table
+SET awards = (SELECT MIN(awards) FROM my_table)
+WHERE country = 'CA';
+
+SELECT * FROM my_table;
+
+* 5.3.8
+DROP TABLE my_table;
+
+DROP TABLE IF EXISTS my_table;
+
+* 5.3.8.1
+表5-19：
+-- Oracle
+DROP TABLE my_table CASCADE CONSTRAINTS;
+
+-- PostgreSQL
+DROP TABLE my_table CASCADE;
+
+* 5.4
+SELECT *
+FROM my_table
+WHERE log_date = '2021-01-01';
+
+* 5.4.2
+CREATE INDEX my_index ON my_table (log_date);
+CREATE INDEX my_index ON my_table (log_date, team);
+
+* 5.4.2.1
+表5-21：
+-- MySQL、SQL Server
+DROP INDEX my_index ON my_table;
+
+-- Oracle、PostgreSQL、SQLite
+DROP INDEX my_index;
+
+* 5.5
+-- それぞれの所有者が所有する滝の数
+SELECT o.id, o.name,
+       COUNT(w.id) AS num_waterfalls
+FROM owner o LEFT JOIN waterfall w
+     ON o.id = w.owner_id
+GROUP BY o.id, o.name;
+
+-- サブクエリーによる方法
+SELECT AVG(num_waterfalls) FROM
+(SELECT o.id, o.name,
+        COUNT(w.id) AS num_waterfalls
+FROM owner o LEFT JOIN waterfall w
+     ON o.id = w.owner_id
+GROUP BY o.id, o.name) my_subquery;
+
+-- ビューによる方法
+CREATE VIEW owner_waterfalls_vw AS
+SELECT o.id, o.name,
+       COUNT(w.id) AS num_waterfalls
+FROM owner o LEFT JOIN waterfall w
+     ON o.id = w.owner_id
+GROUP BY o.id, o.name;
+
+SELECT AVG(num_waterfalls)
+  FROM owner_waterfalls_vw;
+
+* 5.5.1
+SELECT *
+FROM my_table
+WHERE country = 'US';
+
+CREATE VIEW my_view AS
+SELECT *
+FROM my_table
+WHERE country = 'US';
+
+SELECT * FROM my_view;
+
+* 5.5.1.1
+表5-22：
+-- MySQL
+SHOW FULL TABLES
+WHERE table_type = 'VIEW';
+
+-- Oracle
+SELECT view_name
+FROM user_views;
+
+-- PostgreSQL
+SELECT table_name
+FROM information_schema.views
+WHERE table_schema NOT IN
+      ('information_schema', 'pg_catalog');
+
+-- SQL Server
+SELECT table_name
+FROM information_schema.views;
+
+-- SQLite
+SELECT name
+FROM sqlite_master
+WHERE type = 'view';
+
+* 5.5.1.2
+表5-23：
+-- MySQL、Oracle、PostgreSQL
+CREATE OR REPLACE VIEW my_view AS
+SELECT *
+FROM my_table
+WHERE country = 'CA';
+
+-- SQL Server
+CREATE OR ALTER VIEW my_view AS
+SELECT *
+FROM my_table
+WHERE country = 'CA';
+
+-- SQLite
+DROP VIEW IF EXISTS my_view;
+CREATE VIEW my_view AS
+SELECT * FROM my_table WHERE country = 'CA';
+
+* 5.5.1.3
+DROP VIEW my_view;
+
+* 5.6
+START TRANSACTION;
+
+INSERT INTO page_views (user_id, page)
+    VALUES (525, 'home');
+INSERT INTO page_views (user_id, page)
+    VALUES (525, 'contact us');
+DELETE FROM new_users WHERE user_id = 525;
+UPDATE page_views SET page = 'request info'
+    WHERE page = 'contact us';
+
+COMMIT;
+
+* 5.6.1
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE books;
+CREATE TABLE books (
+    id      INTEGER,
+    title   VARCHAR(20)
+);
+INSERT INTO books VALUES (1, 'Becoming');
+INSERT INTO books VALUES (2, 'Born a Crime');
+INSERT INTO books VALUES (3, 'Bossypants');
+
+
+-- MySQLおよびPostgreSQL
+START TRANSACTION;
+または
+BEGIN;
+
+-- SQL ServerおよびSQLite
+BEGIN TRANSACTION;
+
+SELECT * FROM books;
+
+SELECT * FROM books WHERE title LIKE '% %';
+
+DELETE FROM books WHERE title LIKE '% %';
+
+SELECT * FROM books;
+
+COMMIT;
+
+* 5.6.2
+-- MySQLおよびPostgreSQL
+START TRANSACTION;
+または
+BEGIN;
+
+-- SQL ServerおよびSQLite
+BEGIN TRANSACTION;
+
+SELECT * FROM books;
+
+DELETE FROM books WHERE title LIKE '%%';
+
+SELECT * FROM books;
+
+ROLLBACK;
+

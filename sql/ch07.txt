@@ -1,0 +1,889 @@
+7章
+
+-- 従業員の賃金を上げる
+SELECT name, pay_rate + 5 AS new_pay_rate
+FROM employees
+WHERE UPPER(title) = 'ANALYST'
+OR YEAR(start_date) BETWEEN 2016 AND 2018;
+
+* 7.1.1
+SELECT *
+FROM employees
+WHERE start_date IS NOT NULL
+      AND (title = 'analyst' OR pay_rate < 25);
+
+* 7.1.2
+SELECT *
+FROM employees
+WHERE start_date IS NOT NULL
+      AND (title = 'analyst'
+      OR pay_rate BETWEEN 15 AND 25);
+
+* 7.1.2.1
+SELECT *
+FROM my_table
+WHERE age BETWEEN 35 AND 44;
+
+SELECT *
+FROM my_table
+WHERE age NOT BETWEEN 35 AND 44;
+
+* 7.1.2.2
+SELECT e.id, e.name
+FROM employees e
+WHERE EXISTS (SELECT *
+              FROM customers c
+              WHERE c.email = e.email);
+
+SELECT *
+FROM employees e INNER JOIN customers c
+     ON e.email = c.email;
+
+SELECT c.id, c.name
+FROM customers c
+WHERE NOT EXISTS (SELECT *
+                  FROM orders o
+                  WHERE o.email = c.email);
+
+* 7.1.2.3
+SELECT *
+FROM employees e
+WHERE e.id IN (10001, 10032, 10057);
+
+SELECT e.id
+FROM employees e
+WHERE e.id NOT IN (SELECT v.emp_id
+                   FROM vacations v);
+
+SELECT e.id
+FROM employees e
+WHERE NOT EXISTS (SELECT *
+                  FROM vacations v
+                  WHERE v.emp_id = e.id);
+
+* 7.1.2.4
+SELECT *
+FROM employees
+WHERE manager IS NULL;
+
+SELECT *
+FROM employees
+WHERE manager IS NOT NULL;
+
+* 7.1.2.5
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id  INTEGER,
+    txt VARCHAR(30)
+);
+INSERT INTO my_table VALUES (1, 'You are great.');
+INSERT INTO my_table VALUES (2, 'Thank you!');
+INSERT INTO my_table VALUES (3, 'Thinking of you.');
+INSERT INTO my_table VALUES (4, 'I''m 100% positive.');
+
+SELECT * FROM my_table;
+
+SELECT *
+FROM my_table
+WHERE txt LIKE '%you%';
+
+SELECT *
+FROM my_table
+WHERE txt LIKE 'You%';
+
+ノート記事：
+SELECT *
+FROM my_table
+WHERE txt LIKE '%!%%' ESCAPE '!';
+
+* 7.1.3
+SELECT salary / 52 AS weekly_pay
+FROM my_table;
+
+ノート記事：
+-- PostgreSQL、SQL Server、SQLite
+SELECT 15/2;
+
+SELECT 15/2.0;
+
+-- PostgreSQLとSQL Server
+SELECT CAST(15 AS DECIMAL) /
+CAST(2 AS DECIMAL);
+
+-- SQLite
+SELECT CAST(15 AS REAL) /
+CAST(2 AS REAL);
+
+* 7.2
+SELECT COUNT(*) AS total_rows,
+       AVG(age) AS average_age
+FROM my_table;
+
+SELECT region, MIN(age), MAX(age)
+FROM my_table
+GROUP BY region
+HAVING MIN(age) < 18;
+
+コラム：
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE goat (
+    name    VARCHAR(10),
+    q1      INTEGER,
+    q2      INTEGER,
+    q3      INTEGER,
+    q4      INTEGER
+);
+INSERT INTO goat VALUES ('Ali', 100, 200, 150, NULL);
+INSERT INTO goat VALUES ('Bolt', 350, 400, 380, 300);
+INSERT INTO goat VALUES ('Jordan', 200, 250, 300, 320);
+
+SELECT * FROM goat;
+
+SELECT name, GREATEST(q1, q2, q3, q4)
+             AS most_miles
+FROM goat;
+
+-- SQLite
+SELECT name, MAX(q1, q2, q3, q4)
+             AS most_miles
+FROM goat;
+
+* 7.3.1
+表7-10：
+※Oracleでは「FROM dual」を追加します。
+
+SELECT ABS(-5);
+
+SELECT SIGN(-5);
+
+SELECT POWER(5,2);
+
+SELECT SQRT(25);
+
+SELECT EXP(2);
+
+SELECT LOG(2,10);
+-- SQL Server
+SELECT LOG(10,2);
+
+SELECT LN(10);
+-- SQL Server
+SELECT LOG(10);
+
+SELECT LOG10(100);
+-- Oracle
+SELECT LOG(10,100) FROM dual;
+
+SELECT MOD(12,5);
+-- SQL Server
+SELECT 12%5;
+
+SELECT PI();
+
+SELECT COS(.78);
+
+* 7.3.2
+表7-11：
+-- MySQL、SQL Server
+SELECT RAND();
+SELECT RAND(22);
+
+-- Oracle
+SELECT DBMS_RANDOM.VALUE FROM dual;
+SELECT DBMS_RANDOM.RANDOM FROM dual;
+
+-- PostgreSQL、SQLite
+SELECT RANDOM();
+
+
+-- ランダムな5行を返す（PostgreSQLとSQLiteでの例）
+SELECT *
+FROM my_table
+ORDER BY RANDOM()
+LIMIT 5;
+
+-- MySQL
+SELECT *
+FROM my_table
+ORDER BY RAND()
+LIMIT 5;
+
+-- Oracleで、ランダムな20%の行を返す
+SELECT *
+FROM my_table
+SAMPLE(20);
+
+-- SQL Serverで、ランダムな100行を返す
+SELECT *
+FROM my_table
+TABLESAMPLE(100 ROWS);
+
+* 7.3.3
+表7-12：
+※Oracleでは「FROM dual」を追加します。
+
+SELECT CEIL(98.7654);
+-- SQL Server
+SELECT CEILING(98.7654);
+
+SELECT FLOOR(98.7654);
+
+SELECT ROUND(98.7654,2);
+
+SELECT TRUNC(98.7654,2);
+-- MySQL
+SELECT TRUNCATE(98.7654,2);
+-- SQL Server
+SELECT ROUND(98.7654,2,1);
+-- SQLite
+SELECT TRUNC(98.7654);
+
+* 7.3.4
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id      INTEGER,
+    str_col VARCHAR(10)
+);
+INSERT INTO my_table VALUES (1, '1.33');
+INSERT INTO my_table VALUES (2, '5.5');
+INSERT INTO my_table VALUES (3, '7.8');
+
+SELECT * FROM my_table;
+
+SELECT *
+FROM my_table
+WHERE str_col > 3;
+
+SELECT *
+FROM my_table
+WHERE CAST(str_col AS DECIMAL) > 3;
+
+* 7.4.1
+SELECT LENGTH(name)
+FROM my_table;
+
+SELECT *
+FROM my_table
+WHERE LENGTH(name) < 10;
+
+ノート記事：
+SELECT LENGTH(TRIM(name))
+FROM my_table;
+
+* 7.4.2
+SELECT UPPER(type)
+FROM my_table;
+
+SELECT *
+FROM my_table
+WHERE LOWER(type) = 'public';
+
+* 7.4.3
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    color   VARCHAR(20)
+);
+INSERT INTO my_table VALUES ('!!red');
+INSERT INTO my_table VALUES (' .orange!');
+INSERT INTO my_table VALUES ('   ..yellow.. ');
+
+SELECT * FROM my_table;
+
+* 7.4.3.1
+SELECT TRIM(color) AS color_clean
+FROM my_table;
+
+* 7.4.3.2
+SELECT TRIM('!' FROM color) AS color_clean
+FROM my_table;
+
+-- SQLite
+SELECT TRIM(color, '!') AS color_clean
+FROM my_table;
+
+* 7.4.3.3
+選択肢 1：
+-- MySQL、Oracle、PostgreSQL
+SELECT TRIM(LEADING '!' FROM color) AS color_clean
+FROM my_table;
+
+選択肢 2：
+-- Oracle、PostgreSQL、SQLite
+SELECT LTRIM(color, '.! ') AS color_clean
+FROM my_table;
+
+-- MySQL、SQL Server
+SELECT LTRIM(color) AS color_clean
+FROM my_table;
+
+* 7.4.4
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id      INTEGER,
+    name    VARCHAR(20)
+);
+INSERT INTO my_table VALUES (1, 'Boots');
+INSERT INTO my_table VALUES (2, 'Pumpkin');
+INSERT INTO my_table VALUES (3, 'Tiger');
+
+SELECT * FROM my_table;
+
+-- MySQL、PostgreSQL、SQL Server
+SELECT CONCAT(id, '_', name) AS id_name
+FROM my_table;
+
+-- Oracle、PostgreSQL、SQLite
+SELECT id || '_' || name AS id_name
+FROM my_table;
+
+* 7.4.5
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    my_text VARCHAR(30)
+);
+INSERT INTO my_table VALUES ('Here is some text.');
+INSERT INTO my_table VALUES ('And some numbers - 1 2 3 4 5');
+INSERT INTO my_table VALUES ('And some punctuation! :)');
+
+SELECT * FROM my_table;
+
+方法 1：
+SELECT *
+FROM my_table
+WHERE my_text LIKE '%some%';
+
+方法 2：
+表7-13：
+-- MySQL、Oracle、SQLite
+SELECT INSTR(my_text, 'some') AS some_location
+FROM my_table;
+
+-- MySQL
+SELECT LOCATE('some', my_text) AS some_location
+FROM my_table;
+
+-- PostgreSQL
+SELECT POSITION('some' IN my_text) AS some_location
+FROM my_table;
+
+SELECT STRPOS(my_text, 'some') AS some_location
+FROM my_table;
+
+-- SQL Server
+SELECT CHARINDEX('some', my_text) AS some_location
+FROM my_table;
+
+* 7.4.6
+-- MySQL、Oracle、PostgreSQL、SQLite
+SELECT SUBSTR(my_text, 14, 8) AS sub_str
+FROM my_table;
+
+-- MySQL
+SELECT SUBSTR(my_text FROM 14 FOR 8) AS sub_str
+FROM my_table;
+
+-- MySQL、PostgreSQL、SQL Server
+SELECT SUBSTRING(my_text, 14, 8) AS sub_str
+FROM my_table;
+
+-- MySQL、PostgreSQL
+SELECT SUBSTRING(my_text FROM 14 FOR 8) AS sub_str
+FROM my_table;
+
+* 7.4.7
+SELECT REPLACE(my_text, 'some', 'the')
+       AS new_text
+FROM my_table;
+
+* 7.4.8
+SELECT REPLACE(my_text, 'some ', '')
+       AS new_text
+FROM my_table;
+
+* 7.4.9
+- 1 tablespoon chili powder
+- .5 tablespoon ground cumin
+- .5 teaspoon paprika
+- .25 teaspoon garlic powder
+- .25 teaspoon onion powder
+- .25 teaspoon crushed red pepper flakes
+- .25 teaspoon dried oregano
+
+(?<=spoon ).*$
+
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE movies (
+    title   VARCHAR(30),
+    city    VARCHAR(30)
+);
+INSERT INTO movies VALUES ('10 Things I Hate About You', 'Seattle');
+INSERT INTO movies VALUES ('22 Jump Street', 'New Orleans');
+INSERT INTO movies VALUES ('The Blues Brothers', 'Chicago');
+INSERT INTO movies VALUES ('Ferris Bueller''s Day Off', 'Chi');
+
+SELECT * FROM movies;
+
+* 7.4.9.1  MySQL
+SELECT *
+FROM movies
+WHERE city REGEXP '(Chicago|CHI|Chitown)';
+
+SELECT *
+FROM movies
+WHERE title REGEXP '\\d';
+
+* 7.4.9.2  Oracle
+SELECT *
+FROM movies
+WHERE REGEXP_LIKE(title, '\d');
+
+ノート記事：
+SELECT * FROM movies WHERE REGEXP_LIKE(title, '\d');
+SELECT * FROM movies WHERE REGEXP_LIKE(title, '[0-9]');
+SELECT * FROM movies WHERE REGEXP_LIKE(title, '[[:digit:]]');
+
+
+SELECT title, REGEXP_COUNT(title, '[A-Z]')
+AS num_caps
+FROM movies;
+
+SELECT title, REGEXP_INSTR(title, '[aeiou]')
+AS first_vowel
+FROM movies;
+
+SELECT title, REGEXP_SUBSTR(title, '[0-9]+')
+AS nums
+FROM movies
+WHERE REGEXP_LIKE(title, '\d');
+
+SELECT REGEXP_REPLACE(title, '[0-9]+', '100')
+AS one_hundred_title
+FROM movies
+WHERE REGEXP_LIKE(title, '\d');
+
+* 7.4.9.3  PostgreSQL
+SELECT *
+FROM movies
+WHERE city SIMILAR TO '(Chicago|CHI|Chi|Chitown)';
+
+SELECT *
+FROM movies
+WHERE title ~ '\d';
+
+SELECT REGEXP_REPLACE(title, '\d+', '100')
+FROM movies;
+
+* 7.4.9.4  SQL Server
+SELECT *
+FROM movies
+WHERE title LIKE '%[0-9]%';
+
+* 7.4.10
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    numbers FLOAT   -- OracleではNUMBER、PostgreSQL、SQL Server、SQLiteではREAL
+);
+INSERT INTO my_table VALUES (1.33);
+INSERT INTO my_table VALUES (2.5);
+INSERT INTO my_table VALUES (3.777);
+
+SELECT * FROM my_table;
+
+SELECT LENGTH(numbers) AS len_num
+FROM my_table;
+
+-- SQL Server
+SELECT LEN(numbers) AS len_num
+FROM my_table;
+
+-- PostgreSQL
+SELECT LENGTH(CAST(numbers AS CHAR(5))) AS len_num
+FROM my_table;
+
+* 7.5.1
+-- MySQL、PostgreSQL、SQLite
+SELECT CURRENT_DATE;
+SELECT CURRENT_TIME;
+SELECT CURRENT_TIMESTAMP;
+
+-- Oracle
+SELECT CURRENT_DATE FROM dual;
+SELECT CAST(CURRENT_TIMESTAMP AS TIME) FROM dual;
+SELECT CURRENT_TIMESTAMP FROM dual;
+
+-- SQL Server
+SELECT CAST(CURRENT_TIMESTAMP AS DATE);
+SELECT CAST(CURRENT_TIMESTAMP AS TIME);
+SELECT CURRENT_TIMESTAMP;
+
+-- SQLite
+SELECT DATE(CURRENT_TIMESTAMP, 'localtime');
+SELECT TIME(CURRENT_TIMESTAMP, 'localtime');
+SELECT DATETIME(CURRENT_TIMESTAMP, 'localtime');
+
+
+SELECT CURRENT_TIME;
+
+-- MySQL、PostgreSQL
+DROP TABLE my_table;
+CREATE TABLE my_table
+       (id INT,
+       creation_datetime TIMESTAMP DEFAULT
+                         CURRENT_TIMESTAMP);
+INSERT INTO my_table (id)
+       VALUES (1), (2), (3);
+
+-- Oracle
+DROP TABLE my_table;
+CREATE TABLE my_table
+       (id INT,
+       creation_datetime TIMESTAMP DEFAULT
+                         CURRENT_TIMESTAMP);
+INSERT INTO my_table (id) VALUES (1);
+INSERT INTO my_table (id) VALUES (2);
+INSERT INTO my_table (id) VALUES (3);
+
+-- SQL Server
+DROP TABLE my_table;
+CREATE TABLE my_table
+       (id INT,
+       creation_datetime DATETIME DEFAULT
+                         CURRENT_TIMESTAMP);
+INSERT INTO my_table (id)
+       VALUES (1), (2), (3);
+
+-- SQLite
+DROP TABLE my_table;
+CREATE TABLE my_table
+       (id INTEGER,
+       creation_datetime REAL DEFAULT
+                         CURRENT_TIMESTAMP);
+INSERT INTO my_table (id)
+       VALUES (1), (2), (3);
+
+
+SELECT * FROM my_table;
+
+SELECT *
+FROM   my_table
+WHERE  creation_datetime < CURRENT_TIMESTAMP;
+
+* 7.5.2
+表7-14：
+-- MySQL
+SELECT CURRENT_DATE - INTERVAL 1 DAY;
+SELECT SUBDATE(CURRENT_DATE, 1);
+SELECT DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY);
+
+-- Oracle
+SELECT CURRENT_DATE - INTERVAL '1' DAY FROM dual;
+
+-- PostgreSQL
+SELECT CAST(CURRENT_DATE - INTERVAL '1 day' AS DATE);
+
+-- SQL Server
+SELECT CAST(CURRENT_TIMESTAMP - 1 AS DATE);
+SELECT DATEADD(DAY, -1, CAST(CURRENT_TIMESTAMP AS DATE));
+
+-- SQLite
+SELECT DATE(CURRENT_DATE, '-1 day');
+SELECT DATE(CURRENT_TIMESTAMP, '-1 day', 'localtime');
+
+表7-15：
+-- MySQL
+SELECT CURRENT_TIMESTAMP + INTERVAL 3 HOUR;
+SELECT ADDDATE(CURRENT_TIMESTAMP, INTERVAL 3 HOUR);
+SELECT DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 3 HOUR);
+
+-- Oracle
+SELECT CURRENT_TIMESTAMP + INTERVAL '3' HOUR FROM dual;
+
+-- PostgreSQL
+SELECT CURRENT_TIMESTAMP + INTERVAL '3 hours';
+
+-- SQL Server
+SELECT DATEADD(HOUR, 3, CURRENT_TIMESTAMP);
+
+-- SQLite
+SELECT DATETIME(CURRENT_TIMESTAMP, '+3 hours');
+SELECT DATETIME(CURRENT_TIMESTAMP, '+3 hours', 'localtime');
+
+* 7.5.3.1
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    start_date  DATE,
+    end_date    DATE
+);
+INSERT INTO my_table VALUES ('2016-10-10', '2020-11-11');
+INSERT INTO my_table VALUES ('2019-03-03', '2021-04-04');
+
+SELECT * FROM my_table;
+
+表7-16：
+-- MySQL
+SELECT DATEDIFF(end_date, start_date) AS day_diff FROM my_table;
+
+-- Oracle
+SELECT (end_date - start_date) AS day_diff FROM my_table;
+
+-- PostgreSQL
+SELECT AGE(end_date, start_date) AS day_diff FROM my_table;
+
+-- SQL Server
+SELECT DATEDIFF(day, start_date, end_date) AS day_diff FROM my_table;
+
+-- SQLite
+SELECT (julianday(end_date) - julianday(start_date)) AS day_diff FROM my_table;
+
+* 7.5.3.2
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    start_time  TIME,
+    end_time    TIME
+);
+INSERT INTO my_table VALUES ('10:30', '11:30');
+INSERT INTO my_table VALUES ('14:50:32', '15:22:45');
+
+SELECT * FROM my_table;
+
+表7-17：
+-- MySQL
+SELECT TIMEDIFF(end_time, start_time) AS time_diff FROM my_table;
+
+-- PostgreSQL
+SELECT EXTRACT(epoch FROM end_time - start_time) AS time_diff FROM my_table;
+
+-- SQL Server
+SELECT DATEDIFF(second, start_time, end_time) AS time_diff FROM my_table;
+
+-- SQLite
+SELECT (strftime('%s',end_time) - strftime('%s',start_time)) AS time_diff FROM my_table;
+
+* 7.5.3.3
+-- テスト用のテーブル
+DROP TABLE my_table;
+
+-- MySQL、SQL Server
+CREATE TABLE my_table (
+    start_dt    DATETIME,
+    end_dt      DATETIME
+);
+-- Oracle、PostgreSQL
+CREATE TABLE my_table (
+    start_dt    TIMESTAMP,
+    end_dt      TIMESTAMP
+);
+-- SQLite
+CREATE TABLE my_table (
+    start_dt    REAL,
+    end_dt      REAL
+);
+
+INSERT INTO my_table VALUES ('2016-10-10 10:30', '2020-11-11 11:30');
+INSERT INTO my_table VALUES ('2019-03-03 14:50:32', '2021-04-04 15:22:45');
+
+SELECT * FROM my_table;
+
+表7-18：
+-- MySQL
+SELECT TIMESTAMPDIFF(hour, start_dt, end_dt) AS hour_diff FROM my_table;
+
+-- Oracle
+SELECT (end_dt - start_dt) AS hour_diff FROM my_table;
+
+-- PostgreSQL
+SELECT AGE(end_dt, start_dt) AS hour_diff FROM my_table;
+
+-- SQL Server
+SELECT DATEDIFF(hour, start_dt, end_dt) AS hour_diff FROM my_table;
+
+-- SQLite
+SELECT ((julianday(end_dt) - julianday(start_dt))*24) AS hour_diff FROM my_table;
+
+ノート記事：
+SELECT AGE(end_dt, start_dt)
+FROM my_table;
+
+SELECT EXTRACT(year FROM
+               AGE(end_dt, start_dt))
+FROM my_table;
+
+* 7.5.4
+表7-19：
+-- MySQL
+SELECT EXTRACT(month FROM CURRENT_DATE);
+SELECT MONTH(CURRENT_DATE);
+
+-- Oracle
+SELECT EXTRACT(month FROM CURRENT_DATE) FROM dual;
+
+-- PostgreSQL
+SELECT EXTRACT(month FROM CURRENT_DATE);
+SELECT DATE_PART('month', CURRENT_DATE);
+
+-- SQL Server
+SELECT DATEPART(month, CURRENT_TIMESTAMP);
+SELECT MONTH(CURRENT_TIMESTAMP);
+
+-- SQLite
+SELECT strftime('%m', CURRENT_DATE);
+SELECT strftime('%m', CURRENT_TIMESTAMP, 'localtime');
+
+* 7.5.5
+表7-21：
+-- MySQL
+SELECT DAYOFWEEK('2020-03-16');
+
+-- Oracle
+SELECT TO_CHAR(DATE '2020-03-16', 'd') FROM dual;
+
+-- PostgreSQL
+SELECT DATE_PART('dow', DATE '2020-03-16');
+
+-- SQL Server
+SELECT DATEPART(weekday, '2020-03-16');
+
+-- SQLite
+SELECT strftime('%w', '2020-03-16');
+
+表7-22：
+-- MySQL
+SELECT DAYNAME('2020-03-16');
+
+-- Oracle
+SELECT TO_CHAR(DATE '2020-03-16', 'day') FROM dual;
+
+-- PostgreSQL
+SELECT TO_CHAR(DATE '2020-03-16', 'day');
+
+-- SQL Server
+SELECT DATENAME(weekday, '2020-03-16');
+
+* 7.5.6.1  Oracle
+SELECT TRUNC(DATE '2020-02-25', 'month')
+FROM dual;
+
+SELECT ROUND(DATE '2020-02-25', 'month')
+FROM dual;
+
+* 7.5.6.2  PostgreSQL
+SELECT DATE_TRUNC('month', DATE '2020-02-25');
+
+SELECT DATE_TRUNC('minute', TIME '10:30:59.12345');
+
+* 7.5.7.1
+表7-23：
+-- MySQL、PostgreSQL、SQL Server
+SELECT CAST('2020-10-15' AS DATE);
+
+-- Oracle
+SELECT CAST('2020-10-15' AS DATE) FROM dual;
+
+-- SQLite
+SELECT DATE('2020-10-15');
+
+表7-24：
+-- MySQL、PostgreSQL、SQL Server
+SELECT CAST('14:30' AS TIME);
+
+-- Oracle
+SELECT CAST('14:30' AS TIME) FROM dual;
+
+-- SQLite
+SELECT TIME('14:30');
+
+表7-25：
+-- MySQL、SQL Server
+SELECT CAST('2020-10-15 14:30' AS DATETIME);
+
+-- Oracle
+SELECT CAST('2020-10-15 14:30' AS TIMESTAMP) FROM dual;
+
+-- PostgreSQL
+SELECT CAST('2020-10-15 14:30' AS TIMESTAMP);
+
+-- SQLite
+SELECT DATETIME('2020-10-15 14:30');
+
+* 7.5.7.2
+表7-26：
+-- MySQL
+SELECT STR_TO_DATE('10-15-22', '%m-%d-%y');
+SELECT STR_TO_DATE('1030', '%H%i');
+
+-- Oracle
+SELECT TO_DATE('10-15-22', 'MM-DD-YY') FROM dual;
+SELECT TO_TIMESTAMP('1030', 'HH24MI') FROM dual;
+
+-- PostgreSQL
+SELECT TO_DATE('10-15-22', 'MM-DD-YY');
+SELECT TO_TIMESTAMP('1030', 'HH24MI');
+
+-- SQL Server
+SELECT CONVERT(DATE, '10-15-22', 10);
+SELECT CAST(CONCAT(10,':',30) AS TIME);
+
+* 7.5.7.3
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    str_column  VARCHAR(20)
+);
+INSERT INTO my_table VALUES ('10/15/2022');
+INSERT INTO my_table VALUES ('10/16/2023');
+INSERT INTO my_table VALUES ('10/17/2024');
+
+SELECT * FROM my_table;
+
+表7-28：
+-- MySQL
+SELECT YEAR(STR_TO_DATE(str_column, '%m/%d/%Y')) FROM my_table;
+
+-- Oracle
+SELECT EXTRACT(year FROM TO_DATE(str_column, 'MM/DD/YYYY')) FROM my_table;
+
+-- PostgreSQL
+SELECT EXTRACT(year FROM TO_DATE(str_column, 'MM/DD/YYYY')) FROM my_table;
+
+-- SQL Server
+SELECT YEAR(CONVERT(DATE, str_column, 101)) FROM my_table;
+
+-- SQLite
+SELECT SUBSTR(str_column, 7) FROM my_table;
+
+* 7.6.1
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id          INTEGER,
+    greeting    VARCHAR(20)
+);
+INSERT INTO my_table VALUES (1, 'hi there');
+INSERT INTO my_table VALUES (2, 'hello!');
+INSERT INTO my_table VALUES (3, NULL);
+
+SELECT * FROM my_table;
+
+SELECT COALESCE(greeting, 'hi') AS greeting
+FROM my_table;
+
+-- MySQL、SQLite
+SELECT IFNULL(greeting, 'hi') AS greeting
+FROM my_table;
+
+-- Oracle
+SELECT NVL(greeting, 'hi') AS greeting
+FROM my_table;
+
+-- SQL Server
+SELECT ISNULL(greeting, 'hi') AS greeting
+FROM my_table;
+

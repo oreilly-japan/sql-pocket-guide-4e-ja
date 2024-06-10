@@ -1,0 +1,192 @@
+* 10.1
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE teas (
+    id          INTEGER,
+    tea         VARCHAR(10),
+    temperature INTEGER
+);
+INSERT INTO teas VALUES (1, 'green', 170);
+INSERT INTO teas VALUES (2, 'black', 200);
+INSERT INTO teas VALUES (3, 'black', 200);
+INSERT INTO teas VALUES (4, 'herbal', 212);
+INSERT INTO teas VALUES (5, 'herbal', 212);
+INSERT INTO teas VALUES (6, 'herbal', 210);
+INSERT INTO teas VALUES (7, 'oolong', 185);
+
+SELECT * FROM teas;
+
+* 10.1.1
+SELECT DISTINCT tea, temperature
+FROM teas;
+
+* 10.1.2
+WITH dup_rows AS (
+     SELECT tea, temperature,
+            COUNT(*) AS num_rows
+     FROM teas
+     GROUP BY tea, temperature
+     HAVING COUNT(*) > 1)
+SELECT t.id, d.tea, d.temperature
+FROM teas t INNER JOIN dup_rows d
+     ON t.tea = d.tea
+     AND t.temperature = d.temperature;
+
+* 10.2
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE sales;
+CREATE TABLE sales (
+    id          INTEGER,
+    employee    VARCHAR(10),
+    s_date      DATE,
+    sales       INTEGER
+);
+INSERT INTO sales VALUES (1, 'Emma', '2021-08-01', 6);
+INSERT INTO sales VALUES (2, 'Emma', '2021-08-02', 17);
+INSERT INTO sales VALUES (3, 'Jack', '2021-08-02', 14);
+INSERT INTO sales VALUES (4, 'Emma', '2021-08-04', 20);
+INSERT INTO sales VALUES (5, 'Jack', '2021-08-05', 5);
+INSERT INTO sales VALUES (6, 'Emma', '2021-08-07', 1);
+
+SELECT * FROM sales;
+
+SELECT s.id, r.employee, r.recent_date, s.sales
+FROM (SELECT employee, MAX(s_date) AS recent_date
+      FROM sales
+      GROUP BY employee) r
+INNER JOIN sales s
+           ON r.employee = s.employee
+           AND r.recent_date = s.s_date;
+
+* 10.3.1
+-- テスト用のテーブル（MySQLの例）
+DROP TABLE my_table;
+CREATE TABLE my_table (
+    id      INTEGER,
+    name    VARCHAR(10)
+);
+INSERT INTO my_table VALUES (1, 'Boots');
+INSERT INTO my_table VALUES (2, 'Pumpkin');
+INSERT INTO my_table VALUES (3, 'Tiger');
+
+SELECT * FROM my_table;
+
+-- MySQL、PostgreSQL、SQL Server
+SELECT CONCAT(id, '_', name) AS id_name
+FROM my_table;
+
+-- Oracle、PostgreSQL、SQLite
+SELECT id || '_' || name AS id_name
+FROM my_table;
+
+* 10.3.2
+SELECT * FROM workouts;
+
+-- MySQL、SQLite
+SELECT name,
+       GROUP_CONCAT(calories) AS calories_list
+FROM workouts
+GROUP BY name;
+
+-- Oracle
+SELECT name,
+       LISTAGG(calories, ',') AS calories_list
+FROM workouts
+GROUP BY name;
+
+-- PostgreSQL
+SELECT name,
+       ARRAY_AGG(calories) AS calories_list
+FROM workouts
+GROUP BY name;
+
+-- SQL Server
+SELECT name,
+       STRING_AGG(calories, ',') AS calories_list
+FROM workouts
+GROUP BY name;
+
+* 10.4
+表10-1：
+-- MySQL
+SELECT table_name, column_name
+FROM information_schema.columns
+WHERE column_name LIKE '%city%'
+      AND table_schema = 'my_db_name';
+
+-- Oracle
+SELECT table_name, column_name
+FROM all_tab_columns
+WHERE column_name LIKE '%CITY%'
+      AND owner = 'MY_USER_NAME';
+
+-- PostgreSQL、SQL Server
+SELECT table_name, column_name
+FROM information_schema.columns
+WHERE column_name LIKE '%city%'
+      AND table_catalog = 'my_db_name';
+
+ノート記事：
+-- SQLite
+.tables
+pragma table_info(my_table);
+
+* 10.5
+-- テスト用のテーブル（MySQLの例）
+CREATE TABLE products (
+    id      INTEGER,
+    name    VARCHAR(30)
+);
+INSERT INTO products VALUES (101, 'Mac and cheese mix');
+INSERT INTO products VALUES (102, 'MIDI keyboard');
+INSERT INTO products VALUES (103, 'Mother''s day card');
+
+SELECT * FROM products;
+
+DROP TABLE deals;
+CREATE TABLE deals (
+    id      INTEGER,
+    name    VARCHAR(30)
+);
+INSERT INTO deals VALUES (102, 'Tech gift');
+INSERT INTO deals VALUES (103, 'Holiday card');
+
+SELECT * FROM deals;
+
+表10-2：
+-- MySQL
+UPDATE deals d,
+       products p
+SET    d.name = p.name
+WHERE  d.id = p.id;
+
+-- Oracle
+UPDATE deals d
+SET    name = (SELECT p.name
+               FROM products p
+               WHERE d.id = p.id);
+
+-- PostgreSQL、SQLite
+UPDATE deals
+SET    name = p.name
+FROM   deals d INNER JOIN products p
+       ON d.id = p.id
+WHERE  deals.id = p.id;
+または
+UPDATE deals
+SET    name = p.name
+FROM   products p
+WHERE  deals.id = p.id;
+
+-- SQL Server
+UPDATE d
+SET    d.name = p.name
+FROM   deals d INNER JOIN products p
+       ON d.id = p.id;
+または
+UPDATE deals
+SET    name = p.name
+FROM   products p
+WHERE  deals.id = p.id;
+
+SELECT * FROM deals;
+

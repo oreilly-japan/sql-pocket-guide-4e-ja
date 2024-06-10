@@ -1,0 +1,305 @@
+4章
+
+-- 一般公開されている2つ以上の滝を巡るツアー
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     tour t LEFT JOIN waterfall w
+         ON t.stop = w.id
+WHERE    w.open_to_public = 'y'
+GROUP BY t.name
+HAVING   COUNT(*) >= 2
+ORDER BY tour_name;
+
+* 4.1.1
+SELECT id, name
+FROM owner;
+
+* 4.1.2
+SELECT *
+FROM owner;
+
+* 4.1.3
+SELECT name, ROUND(population * 0.9, 0)
+FROM county;
+
+* 4.1.4
+SELECT CURRENT_DATE;
+
+* 4.1.5
+SELECT id, name,
+       ROUND(population * 0.9, 0)
+FROM county;
+
+-- エイリアス名
+SELECT id county_id, name,
+       ROUND(population * 0.9, 0) estimated_pop
+FROM county;
+
+-- AS エイリアス名
+SELECT id AS county_id, name,
+       ROUND(population * 0.90, 0) AS estimated_pop
+FROM county;
+
+* 4.1.5.1
+SELECT id AS "Waterfall #",
+  name AS "Waterfall Name"
+FROM waterfall;
+
+* 4.1.6
+SELECT owner.id, owner.name
+FROM owner;
+
+* 4.1.6.1
+SELECT sqlbook.owner.id, sqlbook.owner.name
+FROM sqlbook.owner;
+
+SELECT o.id, o.name
+FROM sqlbook.owner o;
+
+SELECT o.id, o.name
+FROM owner o;
+
+コラム：
+-- 列エイリアス
+SELECT num AS new_col
+FROM my_table;
+
+-- テーブルエイリアス
+SELECT *
+FROM my_table mt;
+
+* 4.1.7
+SELECT  id, name, population,
+        (SELECT AVG(population) FROM county)
+        AS average_pop
+FROM county;
+
+* 4.1.7.1
+SELECT  o.id, o.name,
+        (SELECT COUNT(*) FROM waterfall w
+        WHERE o.id = w.owner_id) AS num_waterfalls
+FROM owner o;
+
+SELECT   o.id, o.name,
+         COUNT(w.id) AS num_waterfalls
+FROM     owner o LEFT JOIN waterfall w
+         ON o.id = w.owner_id
+GROUP BY o.id, o.name;
+
+* 4.1.8
+SELECT o.type, w.open_to_public
+FROM owner o
+JOIN waterfall w ON o.id = w.owner_id;
+
+SELECT ALL o.type, w.open_to_public
+FROM owner o
+JOIN waterfall w ON o.id = w.owner_id;
+
+SELECT DISTINCT o.type, w.open_to_public
+FROM owner o
+JOIN waterfall w ON o.id = w.owner_id;
+
+* 4.1.8.1
+SELECT COUNT(DISTINCT type) AS unique_type
+FROM owner;
+
+SELECT COUNT(*) AS num_unique
+FROM (SELECT DISTINCT o.type, w.open_to_public
+      FROM owner o JOIN waterfall w
+      ON o.id = w.owner_id) my_subquery;
+
+-- MySQLでの同等のクエリー
+SELECT COUNT(DISTINCT o.type, w.open_to_public)
+       AS num_unique
+       FROM owner o JOIN waterfall w
+            ON o.id = w.owner_id;
+
+-- PostgreSQLでの同等のクエリー
+SELECT COUNT(DISTINCT (o.type, w.open_to_public))
+       AS num_unique
+       FROM owner o JOIN waterfall w
+            ON o.id = w.owner_id;
+
+* 4.2
+SELECT name
+FROM waterfall;
+
+SELECT name
+FROM sqlbook.waterfall;
+
+* 4.2.1
+SELECT *
+FROM waterfall w JOIN tour t
+     ON w.id = t.stop;
+
+* 4.2.1.3
+SELECT w.name, t.name
+FROM waterfall w JOIN tour t
+     ON w.id = t.stop;
+
+SELECT w.name AS waterfall_name,
+       t.name AS tour_name
+FROM waterfall w JOIN tour t
+     ON w.id = t.stop;
+
+* 4.2.2
+SELECT w.name AS waterfall_name,
+       o.name AS owner_name
+FROM (SELECT * FROM owner WHERE type = 'public') o
+     JOIN waterfall w
+     ON o.id = w.owner_id;
+
+ステップ 1：
+SELECT * FROM owner WHERE type = 'public';
+
+ステップ 2：
+SELECT w.name AS waterfall_name,
+       o.name AS owner_name
+FROM (SELECT * FROM owner WHERE type = 'public') o JOIN waterfall w
+     ON o.id = w.owner_id;
+
+コラム：
+WITH o AS (SELECT * FROM owner
+           WHERE type = 'public')
+SELECT w.name AS waterfall_name,
+       o.name AS owner_name
+FROM o JOIN waterfall w
+     ON o.id = w.owner_id;
+
+* 4.2.3
+例 1：
+SELECT name, COUNT(stop) AS num_stops
+FROM tour
+GROUP BY name;
+
+SELECT AVG(num_stops) FROM
+(SELECT name, COUNT(stop) AS num_stops
+FROM tour
+GROUP BY name) tour_stops;
+
+例 2：
+SELECT w.name AS waterfall_name,
+       o.name AS owner_name
+FROM   owner o
+       JOIN waterfall w ON o.id = w.owner_id
+WHERE  o.type = 'public';
+
+SELECT w.name AS waterfall_name,
+       o.name AS owner_name
+FROM   (SELECT * FROM owner
+       WHERE type = 'public') o
+       JOIN waterfall w ON o.id = w.owner_id;
+
+* 4.3
+SELECT *
+FROM my_table
+WHERE year_id = 2021;
+
+SELECT *
+FROM my_table
+LIMIT 10;
+
+SELECT id, name
+FROM waterfall
+WHERE name NOT LIKE '%Falls%';
+
+* 4.3.1
+SELECT id, name
+FROM waterfall
+WHERE name NOT LIKE '%Falls%'
+      AND owner_id IS NULL;
+
+* 4.3.2
+SELECT w.name
+FROM   waterfall w
+WHERE  w.open_to_public = 'y'
+       AND w.county_id IN (
+           SELECT c.id FROM county c
+           WHERE c.name = 'Alger');
+
+* 4.3.2.1
+SELECT w.name
+FROM   waterfall w
+WHERE  w.open_to_public = 'y';
+
+-- WHERE句でのサブクエリー
+SELECT w.name
+FROM   waterfall w
+WHERE  w.open_to_public = 'y'
+       AND w.county_id IN (
+           SELECT c.id FROM county c
+           WHERE c.name = 'Alger');
+
+-- JOIN句による結合
+SELECT w.name
+FROM   waterfall w INNER JOIN county c
+       ON w.county_id = c.id
+WHERE  w.open_to_public = 'y'
+       AND c.name = 'Alger';
+
+* 4.4
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     waterfall w INNER JOIN tour t
+         ON w.id = t.stop
+GROUP BY t.name;
+
+* 4.5
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     waterfall w INNER JOIN tour t
+         ON w.id = t.stop
+GROUP BY t.name;
+
+SELECT   t.name AS tour_name,
+         COUNT(*) AS num_waterfalls
+FROM     waterfall w INNER JOIN tour t
+         ON w.id = t.stop
+GROUP BY t.name
+HAVING   COUNT(*) = 6;
+
+* 4.6
+SELECT   COALESCE(o.name, 'Unknown') AS owner,
+         w.name AS waterfall_name
+FROM     waterfall w
+         LEFT JOIN owner o ON w.owner_id = o.id;
+
+SELECT   COALESCE(o.name, 'Unknown') AS owner,
+         w.name AS waterfall_name
+FROM     waterfall w
+         LEFT JOIN owner o ON w.owner_id = o.id
+ORDER BY owner, waterfall_name;
+
+SELECT   COALESCE(o.name, 'Unknown') AS owner,
+         w.name AS waterfall_name
+FROM     waterfall w
+         LEFT JOIN owner o ON w.owner_id = o.id
+ORDER BY owner DESC, waterfall_name ASC;
+
+SELECT   COALESCE(o.name, 'Unknown') AS owner,
+         w.name AS waterfall_name
+FROM     waterfall w
+         LEFT JOIN owner o ON w.owner_id = o.id
+ORDER BY o.id DESC, w.id;
+
+SELECT   COALESCE(o.name, 'Unknown') AS owner,
+         w.name AS waterfall_name
+FROM     waterfall w
+         LEFT JOIN owner o ON w.owner_id = o.id
+ORDER BY 1 DESC, 2 ASC;
+
+* 4.7
+-- MySQL、PostgreSQL、SQLite
+SELECT *
+FROM owner
+LIMIT 3;
+
+-- Oracle
+SELECT *
+FROM owner
+WHERE ROWNUM <= 3;
+
+-- SQL Server
+SELECT TOP 3 *
+FROM owner;
+
